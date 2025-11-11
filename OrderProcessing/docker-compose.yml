@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  api:
+    build:
+      context: ./OrderProcessing
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Mongo__ConnectionString=mongodb://admin:admin@mongo:27017/?authSource=admin
+      - Mongo__Database=orderdb
+      - Rabbit__HostName=rabbitmq
+      - Rabbit__Port=5672
+      - Rabbit__UserName=guest
+      - Rabbit__Password=guest
+      - Rabbit__QueueName=orders
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mongo
+      - rabbitmq
+
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
+volumes:
+  mongo_data:
+
+
